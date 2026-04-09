@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyCast - 天气预报</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=ZCOOL+KuaiLe&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --tertiary: #0f3460;
+            --accent-sunny: #f39c12;
+            --accent-rainy: #3498db;
+            --accent-cloudy: #95a5a6;
+            --text-primary: #ffffff;
+            --text-secondary: #b8c5d6;
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --card-radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .sky-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            animation: skyShift 20s ease-in-out infinite alternate;
+        }
+
+        @keyframes skyShift {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(30deg); }
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .logo {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 2rem;
+            background: linear-gradient(135deg, #f39c12, #e74c3c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 8px 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1rem;
+            padding: 8px;
+            width: 200px;
+            outline: none;
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .search-box button {
+            background: linear-gradient(135deg, var(--accent-sunny), #e67e22);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Ad Banner */
+        .ad-banner-top {
+            width: 100%;
+            height: 90px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .ad-banner-top .ad-content {
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 24px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Glass Card */
+        .glass-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius);
+            padding: 24px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-4px);
+        }
+
+        /* Current Weather */
+        .current-weather {
+            text-align: center;
+            padding: 40px 24px;
+        }
+
+        .city-name {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 2.5rem;
+            margin-bottom: 8px;
+        }
+
+        .update-time {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+        }
+
+        .temperature-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .temp-value {
+            font-size: 5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .temp-unit {
+            font-size: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .weather-condition {
+            font-size: 1.5rem;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .weather-icon {
+            font-size: 2.5rem;
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .weather-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .detail-item {
+            text-align: center;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .detail-icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .detail-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+
+        .detail-value {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        /* Hourly Forecast */
+        .section-title {
+            font-family: 'ZCOOL KuaiLe', cursive;
+            font-size: 1.3rem;
+            margin-bottom: 16px;
+        }
+
+        .hourly-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 12px 4px;
+        }
+
+        .hourly-item {
+            min-width: 70px;
+            text-align: center;
+            padding: 16px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .hourly-time {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .hourly-icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .hourly-temp {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Daily Forecast */
+        .daily-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .daily-item {
+            display: grid;
+            grid-template-columns: 100px 60px 1fr 100px;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .daily-date .weekday {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .daily-icon {
+            font-size: 1.8rem;
+        }
+
+        .daily-condition {
+            color: var(--text-secondary);
+        }
+
+        .daily-temp {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .temp-high {
+            color: var(--accent-sunny);
+            font-weight: 600;
+        }
+
+        .temp-low {
+            color: var(--accent-cloudy);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Ad Sidebar */
+        .ad-sidebar {
+            width: 300px;
+            height: 250px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--card-radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Air Quality */
+        .air-quality {
+            text-align: center;
+        }
+
+        .aqi-value {
+            font-size: 3rem;
+            font-weight: 700;
+            margin: 16px 0;
+        }
+
+        .aqi-level {
+            padding: 8px 24px;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: 500;
+        }
+
+        .aqi-good { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+        .aqi-moderate { background: linear-gradient(135deg, #f39c12, #e67e22); }
+
+        /* Sun Times */
+        .sun-times {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .sun-item {
+            text-align: center;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+        }
+
+        .sun-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .sun-time {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .sun-label {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--accent-sunny);
+            text-decoration: none;
+        }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid var(--glass-border);
+            border-top-color: var(--accent-sunny);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .city-name { font-size: 1.8rem; }
+            .temp-value { font-size: 3.5rem; }
+            .weather-details { grid-template-columns: 1fr; }
+            .daily-item { grid-template-columns: 80px 50px 1fr; }
+            header { flex-direction: column; text-align: center; }
+            .search-box { width: 100%; }
+            .search-box input { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="sky-background"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="logo">🌤️ SkyCast</div>
+            <div class="search-box">
+                <input type="text" id="cityInput" placeholder="搜索城市..." value="北京">
+                <button onclick="searchCity()">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <path d="M21 21l-4.35-4.35"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Top Ad Banner -->
+        <div class="ad-banner-top">
+            <div class="ad-content">
+                <div style="font-size: 0.7rem; opacity: 0.6; margin-bottom: 4px;">广告 · Advertisement</div>
+                <div>天气用品 · 生活必备</div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Weather Section -->
+            <div class="weather-section">
+                <!-- Current Weather -->
+                <div class="glass-card current-weather">
+                    <div class="city-name" id="cityName">北京</div>
+                    <div class="update-time" id="updateTime">更新时间: --</div>
+                    
+                    <div class="temperature-display">
+                        <span class="temp-value" id="tempValue">--</span>
+                        <span class="temp-unit">°C</span>
+                    </div>
+                    
+                    <div class="weather-condition">
+                        <span class="weather-icon" id="weatherIcon">☀️</span>
+                        <span id="weatherCondition">加载中...</span>
+                    </div>
+
+                    <div class="weather-details">
+                        <div class="detail-item">
+                            <div class="detail-icon">💧</div>
+                            <div class="detail-label">湿度</div>
+                            <div class="detail-value" id="humidity">--%</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon">💨</div>
+                            <div class="detail-label">风速</div>
+                            <div class="detail-value" id="wind">-- km/h</div>
+                        </div>
+                        <div class="detail-item">
+                            <div class="detail-icon">👁️</div>
+                            <div class="detail-label">能见度</div>
+                            <div class="detail-value" id="visibility">-- km</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hourly Forecast -->
+                <div class="glass-card" style="margin-top: 24px;">
+                    <div class="section-title">⏰ 小时预报</div>
+                    <div class="hourly-scroll" id="hourlyForecast">
+                        <div class="loading"><div class="spinner"></div></div>
+                    </div>
+                </div>
+
+                <!-- Daily Forecast -->
+                <div class="glass-card" style="margin-top: 24px;">
+                    <div class="section-title">📅 7天预报</div>
+                    <div class="daily-list" id="dailyForecast">
+                        <div class="loading"><div class="spinner"></div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Ad Sidebar -->
+                <div class="ad-sidebar">
+                    <div style="text-align: center; color: var(--text-secondary);">
+                        <div style="font-size: 0.7rem; opacity: 0.6; margin-bottom: 4px;">广告 · Advertisement</div>
+                        <div>300×250</div>
+                    </div>
+                </div>
+
+                <!-- Air Quality -->
+                <div class="glass-card air-quality">
+                    <div class="section-title">🌬️ 空气质量</div>
+                    <div class="aqi-value" id="aqiValue">--</div>
+                    <div class="aqi-level aqi-good" id="aqiLevel">加载中</div>
+                </div>
+
+                <!-- Sunrise/Sunset -->
+                <div class="glass-card">
+                    <div class="section-title">🌅 日出日落</div>
+                    <div class="sun-times">
+                        <div class="sun-item">
+                            <div class="sun-icon">🌅</div>
+                            <div class="sun-time" id="sunrise">--:--</div>
+                            <div class="sun-label">日出</div>
+                        </div>
+                        <div class="sun-item">
+                            <div class="sun-icon">🌇</div>
+                            <div class="sun-time" id="sunset">--:--</div>
+                            <div class="sun-label">日落</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            <p>© 2026 SkyCast 天气预报网 · <a href="#">使用条款</a> · <a href="#">隐私政策</a></p>
+            <p style="margin-top: 8px;">数据来源: wttr.in</p>
+        </footer>
+    </div>
+
+    <script>
+        // Weather icon mapping
+        const weatherIcons = {
+            'Sunny': '☀️',
+            'Clear': '☀️',
+            'Partly cloudy': '⛅',
+            'Cloudy': '☁️',
+            'Overcast': '☁️',
+            'Rain': '🌧️',
+            'Light rain': '🌦️',
+            'Heavy rain': '⛈️',
+            'Snow': '❄️',
+            'Thunderstorm': '⛈️',
+            'Fog': '🌫️',
+            'Mist': '🌫️'
+        };
+
+        // Mock data for demonstration
+        const mockData = {
+            current: {
+                temp: 22,
+                condition: '多云',
+                humidity: 65,
+                wind: 12,
+                visibility: 10
+            },
+            hourly: [
+                { time: '现在', icon: '⛅', temp: 22 },
+                { time: '14:00', icon: '☁️', temp: 23 },
+                { time: '15:00', icon: '☁️', temp: 23 },
+                { time: '16:00', icon: '🌧️', temp: 21 },
+                { time: '17:00', icon: '🌧️', temp: 20 },
+                { time: '18:00', icon: '☁️', temp: 19 },
+                { time: '19:00', icon: '☁️', temp: 18 },
+                { time: '20:00', icon: '🌙', temp: 17 }
+            ],
+            daily: [
+                { date: '今天', weekday: '周四', icon: '⛅', condition: '多云', high: 23, low: 15 },
+                { date: '明天', weekday: '周五', icon: '🌧️', condition: '小雨', high: 20, low: 14 },
+                { date: '周六', weekday: '周六', icon: '☁️', condition: '阴', high: 21, low: 13 },
+                { date: '周日', weekday: '周日', icon: '☀️', condition: '晴', high: 25, low: 16 },
+                { date: '周一', weekday: '周一', icon: '☀️', condition: '晴', high: 26, low: 17 },
+                { date: '周二', weekday: '周二', icon: '⛅', condition: '多云', high: 24, low: 16 },
+                { date: '周三', weekday: '周三', icon: '🌧️', condition: '小雨', high: 21, low: 14 }
+            ]
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadWeather('北京');
+        });
+
+        function searchCity() {
+            const city = document.getElementById('cityInput').value.trim();
+            if (city) {
+                loadWeather(city);
+            }
+        }
+
+        function loadWeather(city) {
+            document.getElementById('cityName').textContent = city;
+            document.getElementById('updateTime').textContent = '更新时间: ' + new Date().toLocaleString('zh-CN');
+
+            // Simulate API delay
+            setTimeout(() => {
+                renderCurrentWeather(mockData.current);
+                renderHourlyForecast(mockData.hourly);
+                renderDailyForecast(mockData.daily);
+                renderAirQuality(45, '优');
+                renderSunTimes('06:12', '18:45');
+            }, 500);
+
+            // Try to fetch real data from wttr.in
+            fetchWeatherData(city);
+        }
+
+        async function fetchWeatherData(city) {
+            try {
+                const response = await fetch(`https://wttr.in/${city}?format=j1`);
+                const data = await response.json();
+                
+                const current = data.current_condition[0];
+                const weather = {
+                    temp: current.temp_C,
+                    condition: current.lang_zh[0].value,
+                    humidity: current.humidity,
+                    wind: current.windspeedKmph,
+                    visibility: current.visibility
+                };
+                
+                renderCurrentWeather(weather);
+                
+                // Hourly forecast
+                const hourly = data.weather[0].hourly.slice(0, 8).map(h => ({
+                    time: h.time.padStart(4, '0').slice(0, 2) + ':00',
+                    icon: weatherIcons[h.weatherDesc[0].value] || '☁️',
+                    temp: h.tempC
+                }));
+                renderHourlyForecast(hourly);
+                
+                // Daily forecast
+                const daily = data.weather.slice(0, 7).map((d, i) => ({
+                    date: i === 0 ? '今天' : i === 1 ? '明天' : d.date,
+                    weekday: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'][new Date(d.date).getDay()],
+                    icon: weatherIcons[d.hourly[4].weatherDesc[0].value] || '☁️',
+                    condition: d.hourly[4].lang_zh[0].value,
+                    high: d.maxtempC,
+                    low: d.mintempC
+                }));
+                renderDailyForecast(daily);
+                
+            } catch (error) {
+                console.log('Using mock data:', error);
+            }
+        }
+
+        function renderCurrentWeather(data) {
+            document.getElementById('tempValue').textContent = data.temp;
+            document.getElementById('weatherCondition').textContent = data.condition;
+            document.getElementById('humidity').textContent = data.humidity + '%';
+            document.getElementById('wind').textContent = data.wind + ' km/h';
+            document.getElementById('visibility').textContent = data.visibility + ' km';
+            
+            // Update icon based on condition
+            const icon = weatherIcons[data.condition] || '☁️';
+            document.getElementById('weatherIcon').textContent = icon;
+        }
+
+        function renderHourlyForecast(hourly) {
+            const container = document.getElementById('hourlyForecast');
+            container.innerHTML = hourly.map(h => `
+                <div class="hourly-item">
+                    <div class="hourly-time">${h.time}</div>
+                    <div class="hourly-icon">${h.icon}</div>
+                    <div class="hourly-temp">${h.temp}°</div>
+                </div>
+            `).join('');
+        }
+
+        function renderDailyForecast(daily) {
+            const container = document.getElementById('dailyForecast');
+            container.innerHTML = daily.map(d => `
+                <div class="daily-item">
+                    <div class="daily-date">
+                        <div>${d.date}</div>
+                        <div class="weekday">${d.weekday}</div>
+                    </div>
+                    <div class="daily-icon">${d.icon}</div>
+                    <div class="daily-condition">${d.condition}</div>
+                    <div class="daily-temp">
+                        <span class="temp-high">${d.high}°</span>
+                        <span class="temp-low">${d.low}°</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderAirQuality(aqi, level) {
+            document.getElementById('aqiValue').textContent = aqi;
+            const levelEl = document.getElementById('aqiLevel');
+            levelEl.textContent = level;
+            levelEl.className = 'aqi-level ' + (aqi <= 50 ? 'aqi-good' : aqi <= 100 ? 'aqi-moderate' : 'aqi-unhealthy');
+        }
+
+        function renderSunTimes(sunrise, sunset) {
+            document.getElementById('sunrise').textContent = sunrise;
+            document.getElementById('sunset').textContent = sunset;
+        }
+
+        // Enter key to search
+        document.getElementById('cityInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') searchCity();
+        });
+    </script>
+</body>
+</html>
