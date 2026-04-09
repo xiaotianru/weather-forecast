@@ -439,6 +439,40 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Bottom Fixed Ad */
+        .ad-bottom-fixed {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(26, 26, 46, 0.95);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .ad-bottom-fixed .close-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: #fff;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             .city-name { font-size: 1.8rem; }
@@ -448,6 +482,12 @@
             header { flex-direction: column; text-align: center; }
             .search-box { width: 100%; }
             .search-box input { width: 100%; }
+            .ad-banner-top { height: 60px; }
+            .ad-sidebar { width: 100%; height: 200px; }
+        }
+
+        @media (min-width: 769px) {
+            .ad-bottom-fixed { display: none; }
         }
     </style>
 </head>
@@ -469,12 +509,23 @@
             </div>
         </header>
 
-        <!-- Top Ad Banner -->
-        <div class="ad-banner-top">
-            <div class="ad-content">
-                <div style="font-size: 0.7rem; opacity: 0.6; margin-bottom: 4px;">广告 · Advertisement</div>
-                <div>天气用品 · 生活必备</div>
-            </div>
+        <!-- Top Ad Banner - 百度联盟/360联盟 横幅广告位 -->
+        <div class="ad-banner-top" id="ad-banner-top">
+            <!-- 百度联盟广告代码 - 请替换为您的实际代码 -->
+            <script type="text/javascript">
+                /* 728x90 横幅广告位 */
+                var cpro_id = "YOUR_BAIDU_AD_ID";
+                // 百度联盟代码示例，申请后替换
+                document.write('<div style="text-align:center;color:#888;font-size:12px;">广告位 - 728×90<br>请接入百度联盟/360联盟代码</div>');
+            </script>
+            <!-- Google AdSense 备选 -->
+            <!--
+            <ins class="adsbygoogle"
+                 style="display:inline-block;width:728px;height:90px"
+                 data-ad-client="ca-pub-YOUR_PUBLISHER_ID"
+                 data-ad-slot="YOUR_AD_SLOT_ID"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            -->
         </div>
 
         <!-- Main Content -->
@@ -534,12 +585,23 @@
 
             <!-- Sidebar -->
             <div class="sidebar">
-                <!-- Ad Sidebar -->
-                <div class="ad-sidebar">
-                    <div style="text-align: center; color: var(--text-secondary);">
-                        <div style="font-size: 0.7rem; opacity: 0.6; margin-bottom: 4px;">广告 · Advertisement</div>
-                        <div>300×250</div>
-                    </div>
+                <!-- Ad Sidebar - 百度联盟/360联盟 矩形广告位 -->
+                <div class="ad-sidebar" id="ad-sidebar">
+                    <!-- 百度联盟 300x250 广告代码 - 请替换为您的实际代码 -->
+                    <script type="text/javascript">
+                        /* 300x250 矩形广告位 */
+                        var cpro_id = "YOUR_BAIDU_AD_ID_300x250";
+                        // 申请后替换为实际代码
+                        document.write('<div style="text-align:center;color:#888;padding:20px;"><div style="font-size:11px;opacity:0.6;margin-bottom:8px;">广告</div>300×250 广告位<br>百度联盟/360联盟</div>');
+                    </script>
+                    <!-- Google AdSense 备选 -->
+                    <!--
+                    <ins class="adsbygoogle"
+                         style="display:inline-block;width:300px;height:250px"
+                         data-ad-client="ca-pub-YOUR_PUBLISHER_ID"
+                         data-ad-slot="YOUR_AD_SLOT_ID_300x250"></ins>
+                    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+                    -->
                 </div>
 
                 <!-- Air Quality -->
@@ -568,8 +630,19 @@
             </div>
         </div>
 
+        <!-- Bottom Fixed Ad - 移动端广告位 -->
+        <div class="ad-bottom-fixed" id="ad-bottom">
+            <!-- 百度联盟 320x50 移动端广告 - 请替换为您的实际代码 -->
+            <script type="text/javascript">
+                /* 320x50 移动端横幅广告 */
+                var mobile_ad_id = "YOUR_MOBILE_AD_ID";
+                // 申请后替换为实际代码
+                document.write('<div style="text-align:center;color:#888;font-size:11px;padding:5px;">广告 - 320×50 移动端广告位</div>');
+            </script>
+        </div>
+
         <!-- Footer -->
-        <footer>
+        <footer style="padding-bottom: 80px;">
             <p>© 2026 SkyCast 天气预报网 · <a href="#">使用条款</a> · <a href="#">隐私政策</a></p>
             <p style="margin-top: 8px;">数据来源: wttr.in</p>
         </footer>
